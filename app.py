@@ -33,13 +33,13 @@ def index():
 @app.route('/api/predict',methods=['GET'])
 def api_predict():
 	try:
-		#payload = request.json
-		#prediction_id = request.json.get('prediction_id')
-		#image_s3_key = request.json.get('image_s3_key')
+		payload = request.json
+		prediction_uuid = request.json.get('prediction_uuid')
+		image_s3_key = request.json.get('image_s3_key')
 
 		image_path = "demo_pic.png"
 		prediction = predict(image_path)
-		resp = jsonify({"status": "cool", "prediction": prediction})
+		resp = jsonify({"status": "cool", "prediction": prediction, "prediction_uuid": prediction_uuid, "image_s3_key": image_s3_key })
 		resp.status_code = 200
 		return resp
 	except Exception as e:
