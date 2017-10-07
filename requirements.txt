@@ -1,0 +1,12 @@
+Flask
+numpy
+pandas
+scikit-image
+scipy
+scikit-learn
+virtualenv
+gunicorn
+boto3
+celery
+requests
+redis
