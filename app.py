@@ -7,6 +7,14 @@ from flask import jsonify
 from flask import request
 import requests
 import json
+
+import boto3
+import io
+import tempfile
+import json
+import os
+
+
 app = Flask(__name__)
 
 #caffe.set_mode_gpu()
@@ -38,7 +46,7 @@ def api_predict():
 		image_s3_key = request.json.get('image_s3_key')
 
 		image_path = "demo_pic.png"
-		prediction = predict(image_path)
+		prediction = predict(image_path_s3)
 		resp = jsonify({"status": "cool", "prediction": prediction, "prediction_uuid": prediction_uuid, "image_s3_key": image_s3_key })
 		resp.status_code = 200
 		return resp
@@ -46,7 +54,8 @@ def api_predict():
 		raise e
 
 
-def predict(image_path, verbose=False):
+def predict(image_path_s3, verbose=False):
+    image_path = s3_to_tempfile(image_path_s3)
 	input_image = caffe.io.load_image(image_path)
 	prediction = Net.predict([input_image],oversample=False)
 
@@ -61,7 +70,25 @@ def predict(image_path, verbose=False):
 		print 'predicted category is {0}'.format(prediction.argmax())
 		print "Weighted mean prediction ", cum_sum
 		print "Integreified Weighted mean prediction ", int(cum_sum)
-	return cum_sum
+	return prediction.argmax()
+
+def s3_to_tempfile(key, _dtype):
+  s3_obj = get_s3_obj(key)
+  f = tempfile.NamedTemporaryFile(delete=False)
+  f.write(s3_obj.read()) 
+  f.seek(0)
+return f.name
+
+def get_s3_obj(key):
+  try:
+    s3 = boto3.client('s3',aws_access_key_id=config.AWS_ACCESS_KEY_ID,aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY)
+    #s3_url = '{}/{}/{}'.format(s3.meta.endpoint_url, BUCKET, key)
+    s3_obj = s3.get_object(Bucket=config.BUCKET, Key=key)['Body']
+    app.logger.info("Downloading S3 key: %s " % key)
+    return s3_obj
+  except Exception as e:
+    app.logger.info(e)
+raise e
 
 #image_path = "demo_pic.png"
 #for k in range(10):
