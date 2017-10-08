@@ -36,8 +36,8 @@ Net = caffe.Classifier(net_model_file, net_pretrained,
 
 audio_model = LinearRegression()
 ### hard code linear coefficiencts ###
-audio_model.coef_ = np.array([-0.00345732])
-audio_model.intercept_ = 87.2709235572
+audio_model.coef_ = np.array([-0.00414669])
+audio_model.intercept_ = 98.2135216968
 
 @app.route('/',methods=['GET'])
 def index():
