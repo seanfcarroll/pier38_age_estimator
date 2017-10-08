@@ -65,8 +65,8 @@ def api_audio():
 	try:
 		audio_threshold = request.json.get('audio_threshold')
 		x = [[audio_threshold]]
-		prediction = audio_model.predict(x)
-		prediction = 25
+		#prediction = audio_model.predict(x)
+		prediction = 21
 		resp = jsonify({"prediction": prediction})
 		resp.status_code = 200
 		return resp
