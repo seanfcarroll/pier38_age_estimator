@@ -33,7 +33,11 @@ Net = caffe.Classifier(net_model_file, net_pretrained,
                        channel_swap=(2,1,0),
                        raw_scale=255,
                        image_dims=(256, 256))
-#audio_model = pickle.load(open("linear2.pickle","rb"))
+
+audio_model = LinearRegression()
+### hard code linear coefficiencts ###
+audio_model.coef_ = np.array([-0.00414669])
+audio_model.intercept_ = 98.2135216968
 
 @app.route('/',methods=['GET'])
 def index():
@@ -60,7 +64,7 @@ def api_audio():
 	try:
 		audio_threshold = request.json.get('audio_threshold')
 		x = [[audio_threshold]]
-		#prediction = audio_model.predict(x)
+		prediction = audio_model.predict(x)
 		prediction = 25
 		resp = jsonify({"prediction": prediction})
 		resp.status_code = 200
