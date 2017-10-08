@@ -15,6 +15,7 @@ import json
 import os
 from sklearn.linear_model import LinearRegression
 import pickle
+import config as config
 
 app = Flask(__name__)
 
@@ -48,11 +49,11 @@ def api_predict():
 	try:
 		payload = request.json
 		prediction_uuid = request.json.get('prediction_uuid')
-		image_s3_key = request.json.get('image_s3_key')
+		image_path_s3 = request.json.get('image_s3_key')
 
 		image_path = "demo_pic.png"
 		prediction = predict(image_path_s3)
-		resp = jsonify({"status": "cool", "prediction": prediction, "prediction_uuid": prediction_uuid, "image_s3_key": image_s3_key })
+		resp = jsonify({"status": "cool", "prediction": prediction, "prediction_uuid": prediction_uuid, "image_s3_key": image_path_s3 })
 		resp.status_code = 200
 		return resp
 	except Exception as e:
@@ -91,7 +92,7 @@ def predict(image_path_s3, verbose=False):
 		print "Integreified Weighted mean prediction ", int(cum_sum)
 	return prediction.argmax()
 
-def s3_to_tempfile(key, _dtype):
+def s3_to_tempfile(key):
   s3_obj = get_s3_obj(key)
   f = tempfile.NamedTemporaryFile(delete=False)
   f.write(s3_obj.read()) 
