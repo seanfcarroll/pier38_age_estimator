@@ -13,7 +13,8 @@ import io
 import tempfile
 import json
 import os
-
+from sklearn.linear_model import LinearRegression
+import pickle
 
 app = Flask(__name__)
 
@@ -32,7 +33,7 @@ Net = caffe.Classifier(net_model_file, net_pretrained,
                        channel_swap=(2,1,0),
                        raw_scale=255,
                        image_dims=(256, 256))
-
+#audio_model = pickle.load(open("linear2.pickle","rb"))
 
 @app.route('/',methods=['GET'])
 def index():
@@ -54,8 +55,22 @@ def api_predict():
 		raise e
 
 
+@app.route('/api/audio',methods=['GET'])
+def api_audio():
+	try:
+		audio_threshold = request.json.get('audio_threshold')
+		x = [[audio_threshold]]
+		#prediction = audio_model.predict(x)
+		prediction = 25
+		resp = jsonify({"prediction": prediction})
+		resp.status_code = 200
+		return resp
+	except Exception as e:
+		raise e
+
+
 def predict(image_path_s3, verbose=False):
-    image_path = s3_to_tempfile(image_path_s3)
+    	image_path = s3_to_tempfile(image_path_s3)
 	input_image = caffe.io.load_image(image_path)
 	prediction = Net.predict([input_image],oversample=False)
 
@@ -77,7 +92,7 @@ def s3_to_tempfile(key, _dtype):
   f = tempfile.NamedTemporaryFile(delete=False)
   f.write(s3_obj.read()) 
   f.seek(0)
-return f.name
+  return f.name
 
 def get_s3_obj(key):
   try:
@@ -88,7 +103,7 @@ def get_s3_obj(key):
     return s3_obj
   except Exception as e:
     app.logger.info(e)
-raise e
+    raise e
 
 #image_path = "demo_pic.png"
 #for k in range(10):
